@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'maven'
+    id 'org.springframework.boot' version '2.5.6'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+}
+
+apply plugin: 'java'
+apply plugin: 'io.spring.dependency-management'
+group 'aws.carddemo'
+version '1.0-SNAPSHOT'
+
+ext {
+    manifest_attributes = [
+        'Implementation-Title': 'COBOL to JAVA template project',
+        'Built-By': System.properties['user.name'],
+        'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+        'Build-Version': "${version}",
+        'Created-By': "Gradle ${gradle.gradleVersion}",
+        'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+        'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+    ]
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+repositories {
+    mavenCentral()
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes manifest_attributes
+    }
+    from { (configurations.compile).collect { it.isDirectory() ? it : zipTree(it) } } {
+        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    }
+    destinationDir file("$buildDir")
+    archiveBaseName.set("${rootProject.name}")
+    archiveVersion.set("${version}")
+    archiveExtension.set("jar")
+    with jar
+}
+
+dependencies {
+    /* to refer openframe-batch-runtime.jar */
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: '3.2.0'
+    implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.2.1'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-batch'
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
+
+    implementation "org.mapstruct:mapstruct:1.3.1.Final"
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.3.1.Final"
+
+    implementation group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+
+    implementation group: 'ch.obermuhlner', name: 'big-math', version: '2.3.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+}

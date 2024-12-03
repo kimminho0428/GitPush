@@ -1,0 +1,34 @@
+.Navigator {
+    width: auto;
+    height: 70px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    overflow: hidden;
+    display: flex;
+
+    .logo {
+        display: flex;
+        flex:0.3;
+        align-items: center;
+        justify-content: flex-start;
+        margin-left: 3rem;
+    }
+
+    .logout {
+        display: flex;
+        flex:0.1;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .trmid {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        color: white;
+        flex:0.5;
+    }
+}

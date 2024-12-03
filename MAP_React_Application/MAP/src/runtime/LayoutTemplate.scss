@@ -1,0 +1,15 @@
+.LayoutTemplate {
+    width: 80%;
+    height: 70%;
+    overflow: hidden;
+    background-color: black;
+    padding-left:20vw;
+    padding-top: 6vh;
+    .linear {
+        background-color: black;
+        position: relative;
+        height: 700px;
+        flex:1;
+    }
+
+}

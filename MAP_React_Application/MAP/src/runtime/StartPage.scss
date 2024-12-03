@@ -1,0 +1,48 @@
+.StartPage {
+    width: auto;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+    margin-bottom: auto;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+
+    .empty_left {
+        display: flex;
+        flex:0.5;
+    }
+
+    .empty_right {
+        display: flex;
+        flex:0.5;
+    }
+
+    button {
+        background: #868296;
+        color: white;
+        display: flex;
+        font-size: 1.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        align-items: center;
+        justify-content: center;
+        flex:1;
+        cursor:pointer;
+        &:hover {
+            background: #adb5bd;
+        }
+    }
+
+    
+    @keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+
+    .content {
+        background: black;
+    }
+}

@@ -1,0 +1,38 @@
+body {
+  margin: 0;
+  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif; */
+  font-family: 'SourceCodePro Bold', monospace;
+  /*font-family: 'NotoSans Bold', monospace;*/
+  /*word-spacing: 0.3rem;*/
+  /* letter-spacing: 0.2rem; */
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /*background-color: #242424;*/
+  /*background-image:*/
+  /*    url(./styles/background/bg_login_navy2.png);*/
+  /*background-repeat: no-repeat;*/
+  /*background-size: 100vw 100vh;*/
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@font-face { 
+  font-family: 'RobotoCondensed Bold'; 
+  src: url(./styles/fonts/RobotoCondensed-Bold.ttf) format('truetype');
+}
+
+@font-face { 
+  font-family: 'NotoSans Bold'; 
+  src: url(./styles/fonts/NotoSans-Bold.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'SourceCodePro Bold';
+  src: url(./styles/fonts/SourceCodePro-Bold.ttf) format('truetype');
+}

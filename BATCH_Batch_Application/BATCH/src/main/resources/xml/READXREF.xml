@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:batch="http://www.springframework.org/schema/batch" xmlns:ofbatch="http://www.tmax.com/schema/ofbatch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.tmax.com/schema/ofbatch http://www.tmax.com/schema/ofbatch/ofbatch.xsd">
+    <job xmlns="http://www.springframework.org/schema/batch" id="READXREF" parent="OFAbstractJob">
+        <step id="step1" parent="OFAbstractStep">
+            <tasklet ref="STEP05"/>
+        </step>
+    </job>
+    <tasklet xmlns="http://www.tmax.com/schema/ofbatch" class="aws.carddemo.batch.Cbact03cTasklet" id="STEP05">
+        <dd dataType="DB" name="STEPLIB" target="AWS_M2_CARDDEMO_LOADLIB" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="XREFFILE" target="AWS_M2_CARDDEMO_CARDXREF_VSAM_KSDS" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="FILE" name="SYSOUT" target="READXREF/STEP05_SYSOUT">
+            <output service="TEST0"/>
+        </dd>
+        <dd dataType="FILE" name="SYSPRINT" target="READXREF/STEP05_SYSPRINT">
+            <output service="TEST0"/>
+        </dd>
+    </tasklet>
+</beans>

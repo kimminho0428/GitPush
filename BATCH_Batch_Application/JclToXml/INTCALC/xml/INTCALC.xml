@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:batch="http://www.springframework.org/schema/batch" xmlns:ofbatch="http://www.tmax.com/schema/ofbatch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.tmax.com/schema/ofbatch http://www.tmax.com/schema/ofbatch/ofbatch.xsd">
+    <job xmlns="http://www.springframework.org/schema/batch" id="INTCALC" parent="OFAbstractJob">
+        <step id="step1" parent="OFAbstractStep">
+            <tasklet ref="STEP15"/>
+        </step>
+    </job>
+    <tasklet xmlns="http://www.tmax.com/schema/ofbatch" class="aws.carddemo.batch.Cbact04cTasklet" id="STEP15" parm="2022071800">
+        <dd dataType="DB" name="STEPLIB" target="AWS_M2_CARDDEMO_LOADLIB" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="FILE" name="SYSPRINT" target="INTCALC/STEP15_SYSPRINT">
+            <output service="TEST0"/>
+        </dd>
+        <dd dataType="FILE" name="SYSOUT" target="INTCALC/STEP15_SYSOUT">
+            <output service="TEST0"/>
+        </dd>
+        <dd dataType="DB" name="TCATBALF" target="AWS_M2_CARDDEMO_TCATBALF_VSAM_KSDS" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="XREFFILE" target="AWS_M2_CARDDEMO_CARDXREF_VSAM_KSDS" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="XREFFIL1" target="AWS_M2_CARDDEMO_CARDXREF_VSAM_AIX_PATH" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="ACCTFILE" target="AWS_M2_CARDDEMO_ACCTDATA_VSAM_KSDS" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="DISCGRP" target="AWS_M2_CARDDEMO_DISCGRP_VSAM_KSDS" truncateFail="false" truncateSuccess="false"/>
+        <dd dataType="DB" name="TRANSACT" target="AWS_M2_CARDDEMO_SYSTRAN" truncateFail="true" truncateSuccess="false"/>
+    </tasklet>
+</beans>

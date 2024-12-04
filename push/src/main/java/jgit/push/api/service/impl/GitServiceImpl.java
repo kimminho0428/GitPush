@@ -2,6 +2,9 @@ package jgit.push.api.service.impl;
 
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.entity.GitInfo;
+import jgit.push.domain.repository.GitInfoRepository;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -9,13 +12,19 @@ import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GitServiceImpl implements GitService {
+
+    private final GitInfoRepository gitInfoRepository;
 
     @Override
     public void pushGithub(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
@@ -24,6 +33,17 @@ public class GitServiceImpl implements GitService {
         } catch (RepositoryNotFoundException e){
             initRepoWithPush(request);
         }
+    }
+
+    @Transactional
+    @Override
+    public void saveGitPushInfo(GitPushRequest request) {
+        gitInfoRepository.save(new GitInfo(request.getUrl(), request.getUsername()));
+    }
+
+    @Override
+    public List<GitInfo> findPushList() {
+        return gitInfoRepository.findAll();
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {

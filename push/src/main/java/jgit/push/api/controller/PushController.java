@@ -2,6 +2,7 @@ package jgit.push.api.controller;
 
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.entity.GitInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -44,8 +46,15 @@ public class PushController {
 
 
         gitService.pushGithub(request);
-
+        gitService.saveGitPushInfo(request);
         return "redirect:/";
+    }
+
+    @GetMapping("/pushlist")
+    public String list(Model model){
+        List<GitInfo> pushlist = gitService.findPushList();
+        model.addAttribute("pushlist", pushlist);
+        return "push/pushList";
     }
 
 }

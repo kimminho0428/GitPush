@@ -19,7 +19,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void pushGithub(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
-        String localPath = "C:\\docker\\CARDDEMO_APP";
+        String localPath = "C:\\docker\\TEST";
         try{
             pushDir(request, localPath);
         } catch (RepositoryNotFoundException e){

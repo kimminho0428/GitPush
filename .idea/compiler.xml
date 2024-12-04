@@ -11,5 +11,9 @@
         <module name="push.push.main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="push.push.main~1" target="17" />
+      <module name="push.push.test~1" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

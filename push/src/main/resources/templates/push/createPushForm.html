@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    <form role="form" action="/push/new" th:object="${PushForm}"
+          method="post">
+        <div class="form-group mb-3">
+            <label th:for="url">url</label>
+            <input type="text" th:field="*{url}" class="form-control"
+                   placeholder="url을 입력하세요"
+                   th:class="${#fields.hasErrors('url')}? 'form-control
+fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('url')}"
+               th:errors="*{url}">Incorrect url</p>
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="username">name</label>
+            <input type="text" th:field="*{username}" class="form-control"
+                   placeholder="username을 입력하세요">
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="token">token</label>
+            <input type="text" th:field="*{token}" class="form-control"
+                   placeholder="token을 입력하세요">
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="message">message</label>
+            <input type="text" th:field="*{message}" class="form-control"
+                   placeholder="message를 입력하세요">
+        </div>
+        <button type="submit" class="btn btn-primary">Push</button>
+    </form>
+    <br/>
+    <div th:replace="~{fragments/footer :: footer}" />
+</div> <!-- /container -->
+</body>
+</html>
+```

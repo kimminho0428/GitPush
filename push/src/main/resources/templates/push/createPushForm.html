@@ -12,6 +12,15 @@
     <form role="form" action="/push/new" th:object="${PushForm}"
           method="post">
         <div class="form-group mb-3">
+            <label th:for="url">localpath</label>
+            <input type="text" th:field="*{localpath}" class="form-control"
+                   placeholder="localpath을 입력하세요"
+                   th:class="${#fields.hasErrors('localpath')}? 'form-control
+fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('url')}"
+               th:errors="*{localpath}">Incorrect localpath</p>
+        </div>
+        <div class="form-group mb-3">
             <label th:for="url">url</label>
             <input type="text" th:field="*{url}" class="form-control"
                    placeholder="url을 입력하세요"
@@ -31,9 +40,9 @@ fieldError' : 'form-control'">
                    placeholder="token을 입력하세요">
         </div>
         <div class="form-group mb-3">
-            <label th:for="message">message</label>
+            <label th:for="message">commit message</label>
             <input type="text" th:field="*{message}" class="form-control"
-                   placeholder="message를 입력하세요">
+                   placeholder="commit message를 입력하세요">
         </div>
         <button type="submit" class="btn btn-primary">Push</button>
     </form>

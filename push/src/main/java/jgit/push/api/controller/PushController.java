@@ -35,6 +35,7 @@ public class PushController {
         }
 
         GitPushRequest request = new GitPushRequest(
+                form.getLocalpath(),
                 form.getUrl(),
                 form.getUsername(),
                 form.getToken(),

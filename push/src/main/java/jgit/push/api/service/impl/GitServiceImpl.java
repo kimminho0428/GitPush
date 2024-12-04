@@ -19,20 +19,19 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void pushGithub(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
-        String localPath = "C:\\docker\\TEST";
         try{
-            pushDir(request, localPath);
+            pushDir(request);
         } catch (RepositoryNotFoundException e){
-            initRepoWithPush(request, localPath);
+            initRepoWithPush(request);
         }
     }
 
-    private void initRepoWithPush(GitPushRequest request, String localPath) throws GitAPIException, IOException, URISyntaxException {
+    private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
         // 새 저장소 초기화
-        Git.init().setDirectory(new File(localPath)).call();
+        Git.init().setDirectory(new File(request.getLocalpath())).call();
 
         // 저장소 열기 시도
-        Git git = Git.open(new File(localPath));
+        Git git = Git.open(new File(request.getLocalpath()));
 
         // Git URI의 원격 저장소 연결
         git.remoteAdd().setName("origin").setUri(new URIish(request.getUrl())).call();
@@ -48,15 +47,14 @@ public class GitServiceImpl implements GitService {
         pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(request.getUsername(), request.getToken()));
         pushCommand.setForce(true);
         pushCommand.call();
-        System.out.println("Push Success");
 
         // Git 객체 닫기
         git.close();
     }
 
-    private void pushDir(GitPushRequest request, String localPath) throws IOException, URISyntaxException, GitAPIException {
+    private void pushDir(GitPushRequest request) throws IOException, URISyntaxException, GitAPIException {
         // 저장소 열기 시도
-        Git git = Git.open(new File(localPath));
+        Git git = Git.open(new File(request.getLocalpath()));
 
         // Git URI의 원격 저장소 연결
         git.remoteAdd().setName("origin").setUri(new URIish(request.getUrl())).call();

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class PushForm {
 
+    private String localpath;
     private String url;
     private String username;
     private String token;

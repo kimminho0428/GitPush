@@ -9,9 +9,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -56,5 +54,24 @@ public class PushController {
         model.addAttribute("pushlist", pushlist);
         return "push/pushList";
     }
+
+    @GetMapping("/push/search")
+    public String searchGitPushInfoForm(Model model){
+        model.addAttribute("SearchForm", new SearchForm());
+        return "push/searchPushForm";
+    }
+
+    @PostMapping("/push/search")
+    public String searchGitPushInfo(@ModelAttribute("SearchForm") SearchForm searchForm, Model model){
+        String username = searchForm.getUsername();
+        GitInfo gitInfo = gitService.findByName(username);
+        model.addAttribute("gitInfo", gitInfo);
+
+        return "push/updatePushForm";
+
+    }
+
+
+
 
 }

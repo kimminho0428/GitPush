@@ -16,4 +16,6 @@ public interface GitService {
 
     List<GitInfo> findPushList();
 
+    GitInfo findByName(String username);
+
 }

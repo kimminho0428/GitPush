@@ -2,6 +2,7 @@ package jgit.push.api.service.impl;
 
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.config.PasswordConfig;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,9 @@ public class GitServiceImpl implements GitService {
 
     private final GitInfoRepository gitInfoRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void pushGithub(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
         try{
@@ -38,12 +44,29 @@ public class GitServiceImpl implements GitService {
     @Transactional
     @Override
     public void saveGitPushInfo(GitPushRequest request) {
-        gitInfoRepository.save(new GitInfo(request.getUrl(), request.getUsername()));
+
+        System.out.println("request.getToken() = " + request.getToken());
+        String encodeToken = passwordEncoder.encode(request.getToken());
+        System.out.println("encodeToken = " + encodeToken);
+
+        gitInfoRepository.save(new GitInfo(
+                request.getLocalpath(),
+                request.getUrl(),
+                request.getUsername(),
+                encodeToken,
+                request.getMessage()
+        ));
+
     }
 
     @Override
     public List<GitInfo> findPushList() {
         return gitInfoRepository.findAll();
+    }
+
+    @Override
+    public GitInfo findByName(String username) {
+        return gitInfoRepository.findByUsername(username);
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {

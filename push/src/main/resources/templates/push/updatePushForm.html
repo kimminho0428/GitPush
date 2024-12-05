@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/bodyHeader :: bodyHeader}"/>
+    <form role="form" action="/push/search" th:object="${gitInfo}"
+          method="post">
+        <div class="form-group mb-3">
+            <label th:for="localpath">Local Path</label>
+            <input type="text" th:field="${gitInfo.localPath}" class="form-control"
+                   placeholder="localpath을 입력하세요">
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="url">url</label>
+            <input type="text" th:field="${gitInfo.url}" class="form-control">
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="username">name</label>
+            <span th:text="*{username}" class="form-control"
+                  style="display: block; background-color: #f4f4f4; border: 1px solid #ddd; padding: 8px;">
+            </span>
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="token">Github Token</label>
+            <span th:text="*{token}" class="form-control"
+                  style="display: block; background-color: #f4f4f4; border: 1px solid #ddd; padding: 8px;">
+            </span>
+        </div>
+        <div class="form-group mb-3">
+            <label th:for="message">Commit Message</label>
+            <input type="text" th:field="${gitInfo.message}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Push</button>
+    </form>
+    <br/>
+    <div th:replace="~{fragments/footer :: footer}" />
+</div> <!-- /container -->
+</body>
+</html>
+```

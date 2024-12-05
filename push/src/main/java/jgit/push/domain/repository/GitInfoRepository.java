@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GitInfoRepository extends JpaRepository<GitInfo, Long> {
+    GitInfo findByUsername(String username);
 }

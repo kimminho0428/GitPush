@@ -12,7 +12,7 @@
     <form role="form" action="/push/new" th:object="${PushForm}"
           method="post">
         <div class="form-group mb-3">
-            <label th:for="url">localpath</label>
+            <label th:for="url">Local Path</label>
             <input type="text" th:field="*{localpath}" class="form-control"
                    placeholder="localpath을 입력하세요"
                    th:class="${#fields.hasErrors('localpath')}? 'form-control
@@ -21,7 +21,7 @@ fieldError' : 'form-control'">
                th:errors="*{localpath}">Incorrect localpath</p>
         </div>
         <div class="form-group mb-3">
-            <label th:for="url">url</label>
+            <label th:for="url">Url</label>
             <input type="text" th:field="*{url}" class="form-control"
                    placeholder="url을 입력하세요"
                    th:class="${#fields.hasErrors('url')}? 'form-control
@@ -30,22 +30,26 @@ fieldError' : 'form-control'">
                th:errors="*{url}">Incorrect url</p>
         </div>
         <div class="form-group mb-3">
-            <label th:for="username">name</label>
+            <label th:for="username">Name</label>
             <input type="text" th:field="*{username}" class="form-control"
                    placeholder="username을 입력하세요">
         </div>
         <div class="form-group mb-3">
-            <label th:for="token">token</label>
+            <label th:for="token">Github Token</label>
             <input type="password" th:field="*{token}" class="form-control"
                    placeholder="token을 입력하세요">
         </div>
         <div class="form-group mb-3">
-            <label th:for="message">commit message</label>
+            <label th:for="message">Commit message</label>
             <input type="text" th:field="*{message}" class="form-control"
                    placeholder="commit message를 입력하세요">
         </div>
-        <button type="submit" class="btn btn-primary">Push</button>
+        <button type="submit" class="btn btn-primary" name="action" value="Push">Push</button>
+        <button type="submit" class="btn btn-primary" name="action" value="Authentication">Authentication</button>
     </form>
+    <div th:if="${message}" class="alert alert-info">
+        <p th:text="${message}"></p>
+    </div>
     <br/>
     <div th:replace="~{fragments/footer :: footer}" />
 </div> <!-- /container -->

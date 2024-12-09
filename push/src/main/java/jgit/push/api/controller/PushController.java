@@ -1,5 +1,6 @@
 package jgit.push.api.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.entity.GitInfo;
@@ -28,7 +29,7 @@ public class PushController {
         return "push/createPushForm";
     }
     @PostMapping("/push/new")
-    public String createPush(PushForm form, BindingResult result) throws GitAPIException, IOException, URISyntaxException {
+    public String createPush(PushForm form, BindingResult result, @RequestParam("action") String action, Model model, HttpSession session) throws GitAPIException, IOException, URISyntaxException {
 
         if (result.hasErrors()){
             return "push/createPushForm";
@@ -42,10 +43,28 @@ public class PushController {
                 form.getMessage()
         );
 
+        if("Authentication".equals(action)){
+            boolean isValid = gitService.checkGitRepository(request);
+            if (isValid){
+                session.setAttribute("isAuthenticated", true);
+                model.addAttribute("message", "Git 인증 성공");
+            } else {
+                session.setAttribute("isAuthenticated", false);
+                model.addAttribute("message", "Git 인증 실패");
+            }
+        } else if ("Push".equals(action)){
+            Object isAuthenticated = session.getAttribute("isAuthenticated");
 
-        gitService.pushGithub(request);
-        gitService.saveGitPushInfo(request);
-        return "redirect:/";
+            if (isAuthenticated == null || !(boolean) isAuthenticated){
+                model.addAttribute("message", "먼저 인증을 완료해주세요.");
+                return "push/createPushForm";
+            }
+            gitService.pushGithub(request);
+            gitService.saveGitPushInfo(request);
+            return "redirect:/";
+        }
+
+        return "push/createPushForm";
     }
 
     @GetMapping("/pushlist")
@@ -64,14 +83,42 @@ public class PushController {
     @PostMapping("/push/search")
     public String searchGitPushInfo(@ModelAttribute("SearchForm") SearchForm searchForm, Model model){
         String username = searchForm.getUsername();
-        GitInfo gitInfo = gitService.findByName(username);
-        model.addAttribute("gitInfo", gitInfo);
+        List<GitInfo> pushlist = gitService.findPushListByName(username);
+        model.addAttribute("pushlist", pushlist);
 
-        return "push/updatePushForm";
+        return "push/pushlistAddUpdate";
 
     }
 
+    @GetMapping("/push/edit")
+    public String editGitRepository(@RequestParam("username") String username,
+                                    @RequestParam("url") String url,
+                                    Model model){
+        GitInfo gitInfo = gitService.findByNameAndUrl(username, url);
+        UpdatePushForm updatePushForm = new UpdatePushForm(
+                gitInfo.getLocalPath(),
+                gitInfo.getUrl(),
+                gitInfo.getUsername(),
+                gitInfo.getRawToken(),
+                gitInfo.getMessage()
+        );
+        model.addAttribute("updatePushForm", updatePushForm);
+        return "push/updatePushForm";
+    }
 
+    @PostMapping("/push/edit")
+    public String editGitRepository(@ModelAttribute("UpdatePushForm") UpdatePushForm updatePushForm, Model model) throws GitAPIException, IOException, URISyntaxException {
+        GitPushRequest request = new GitPushRequest(
+                updatePushForm.getLocalpath(),
+                updatePushForm.getUrl(),
+                updatePushForm.getUsername(),
+                updatePushForm.getToken(),
+                updatePushForm.getMessage()
+        );
 
+        gitService.pushGithub(request);
+        gitService.saveGitPushInfo(request);
 
+        return "redirect:/";
+    }
 }

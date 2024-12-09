@@ -1,9 +1,11 @@
 package jgit.push.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import jgit.push.config.AESUtil;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "git_info")
@@ -26,16 +28,27 @@ public class GitInfo extends BaseEntity {
     private String username;
 
     @Column(name = "token")
-    private String token;
+    private String encryptedToken;
 
     @Column(name = "message")
     private String message;
 
-    public GitInfo(String localPath, String url, String username, String token, String message) {
+    @Transient
+    private String rawToken; // 복호화된 토큰으로 DB에 저장되지 않음
+
+    @Builder(toBuilder = true)
+    public GitInfo(String localPath, String url, String username, String encryptedToken, String message) {
         this.localPath = localPath;
         this.url = url;
         this.username = username;
-        this.token = token;
+        this.encryptedToken = AESUtil.encrypt(encryptedToken);
         this.message = message;
+    }
+
+    @PostLoad
+    private void decryptToken(){
+        if (this.encryptedToken != null){
+            this.rawToken = AESUtil.decrypt(this.encryptedToken);
+        }
     }
 }

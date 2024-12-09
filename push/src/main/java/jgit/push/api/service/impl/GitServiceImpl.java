@@ -1,14 +1,16 @@
 package jgit.push.api.service.impl;
 
+import ch.qos.logback.core.util.StringUtil;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
-import jgit.push.config.PasswordConfig;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -29,14 +31,11 @@ public class GitServiceImpl implements GitService {
 
     private final GitInfoRepository gitInfoRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     public void pushGithub(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
-        try{
+        try {
             pushDir(request);
-        } catch (RepositoryNotFoundException e){
+        } catch (RepositoryNotFoundException e) {
             initRepoWithPush(request);
         }
     }
@@ -45,18 +44,14 @@ public class GitServiceImpl implements GitService {
     @Override
     public void saveGitPushInfo(GitPushRequest request) {
 
-        System.out.println("request.getToken() = " + request.getToken());
-        String encodeToken = passwordEncoder.encode(request.getToken());
-        System.out.println("encodeToken = " + encodeToken);
-
+        String token = request.getToken();
         gitInfoRepository.save(new GitInfo(
                 request.getLocalpath(),
                 request.getUrl(),
                 request.getUsername(),
-                encodeToken,
+                token,
                 request.getMessage()
         ));
-
     }
 
     @Override
@@ -65,8 +60,13 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public GitInfo findByName(String username) {
-        return gitInfoRepository.findByUsername(username);
+    public List<GitInfo> findPushListByName(String username) {
+        return gitInfoRepository.findAllByUsername(username);
+    }
+
+    @Override
+    public GitInfo findByNameAndUrl(String username, String url) {
+        return gitInfoRepository.findByUsernameAndUrl(username, url);
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
@@ -116,5 +116,35 @@ public class GitServiceImpl implements GitService {
 
         // Git 객체 닫기
         git.close();
+    }
+
+    @Override
+    public boolean checkGitRepository(GitPushRequest request) {
+        String url = request.getUrl();
+        String username = request.getUsername();
+        String token = request.getToken();
+
+        try {
+            Git.lsRemoteRepository()
+                    .setHeads(true)
+                    .setTags(true)
+                    .setRemote(url)
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, token))
+                    .call();
+            return true;
+        } catch (InvalidRemoteException e) {
+            System.out.println("Invalid remote URL: " + e.getMessage());
+        } catch (TransportException e) {
+            if (e.getMessage().contains("Authentication is required") || e.getMessage().contains("not authorized")) {
+                System.out.println("Invalid username or token.");
+            } else if(e.getMessage().contains("Not Found")){
+                System.out.println("Git URL does not exist in Github.");
+            }else {
+                System.out.println("Transport exception: " + e.getMessage());
+            }
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
     }
 }

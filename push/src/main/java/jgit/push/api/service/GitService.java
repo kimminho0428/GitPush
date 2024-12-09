@@ -14,8 +14,12 @@ public interface GitService {
 
     void saveGitPushInfo(GitPushRequest request);
 
+    boolean checkGitRepository(GitPushRequest request);
+
     List<GitInfo> findPushList();
 
-    GitInfo findByName(String username);
+    List<GitInfo> findPushListByName(String username);
+
+    GitInfo findByNameAndUrl(String username, String url);
 
 }

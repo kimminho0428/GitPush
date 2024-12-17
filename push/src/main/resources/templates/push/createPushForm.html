@@ -1,9 +1,46 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: header}" />
+<head th:replace="~{fragments/header :: header}"/>
 <style>
     .fieldError {
         border-color: #bd2130;
+    }
+
+    /* 모달창 스타일 */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
     }
 </style>
 <body>
@@ -45,14 +82,108 @@ fieldError' : 'form-control'">
                    placeholder="commit message를 입력하세요">
         </div>
         <button type="submit" class="btn btn-primary" name="action" value="Push">Push</button>
-        <button type="submit" class="btn btn-primary" name="action" value="Authentication">Authentication</button>
+        <button type="button" class="btn btn-primary" id="authBtn" value="Authentication">Authentication</button>
     </form>
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Authentication</h2>
+            <p style="color:red;"></p>
+            <form id="authForm">
+                <div class="form-group mb-3">
+                    <label for="modalUrl">Url</label>
+                    <input type="text" id="modalUrl" class="form-control" placeholder="url을 입력하세요">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="modalUsername">Username</label>
+                    <input type="text" id="modalUsername" class="form-control" placeholder="username을 입력하세요">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="modalToken">Github Token</label>
+                    <input type="password" id="modalToken" class="form-control" placeholder="token을 입력하세요">
+                </div>
+                <button type="submit" class="btn btn-primary">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
     <div th:if="${message}" class="alert alert-info">
         <p th:text="${message}"></p>
     </div>
     <br/>
-    <div th:replace="~{fragments/footer :: footer}" />
+    <div th:replace="~{fragments/footer :: footer}"/>
 </div> <!-- /container -->
+
+<script>
+    // 모달창 열기
+    document.getElementById("authBtn").onclick = function () {
+        document.getElementById("authModal").style.display = "block";
+    }
+
+    // 모달창 닫기
+    document.querySelector(".close").onclick = function () {
+        document.getElementById("authModal").style.display = "none";
+    }
+
+    // 인증 폼 제출
+    document.getElementById("authForm").onsubmit = function (event) {
+        event.preventDefault();
+
+        // 여기에 인증 요청을 처리하는 코드 추가 (예: Ajax 호출)
+        let modalUrl = document.getElementById("modalUrl").value;
+        let modalUsername = document.getElementById("modalUsername").value;
+        let modalToken = document.getElementById("modalToken").value;
+
+        let errorMessage = document.querySelector("#authModal p");
+
+        if (!modalUrl){
+            errorMessage.textContent = "Git URL을 입력하세요";
+            errorMessage.style.color = "red";
+            return;
+        }
+
+        if (!modalUsername){
+            errorMessage.textContent = "Git Username을 입력하세요.";
+            errorMessage.style.color = "red";
+            return;
+        }
+
+        if (!modalToken){
+            errorMessage.textContent = "Github Token을 입력하세요";
+            errorMessage.style.color = "red";
+            return;
+        }
+
+        // 예: 인증 처리 후 모달창 닫기
+        fetch("/push/check-repository", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                url: modalUrl,
+                username: modalUsername,
+                token: modalToken
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert(data.message); // 인증 성공 메시지
+                    document.getElementById("authModal").style.display = "none";
+                } else {
+                    // 에러 메시지를 표시
+                    errorMessage.textContent = data.message;
+                    errorMessage.style.color = "red";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+
+            });
+    }
+</script>
+
 </body>
 </html>
 ```

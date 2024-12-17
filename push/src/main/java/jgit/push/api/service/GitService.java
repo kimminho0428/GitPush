@@ -7,6 +7,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 public interface GitService {
 
@@ -14,7 +15,7 @@ public interface GitService {
 
     void saveGitPushInfo(GitPushRequest request);
 
-    boolean checkGitRepository(GitPushRequest request);
+    Map<String, String> checkGitRepository(GitPushRequest request);
 
     List<GitInfo> findPushList();
 

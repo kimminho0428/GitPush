@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -119,10 +121,11 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public boolean checkGitRepository(GitPushRequest request) {
+    public Map<String, String> checkGitRepository(GitPushRequest request) {
         String url = request.getUrl();
         String username = request.getUsername();
         String token = request.getToken();
+        Map<String, String> result = new HashMap<>();
 
         try {
             Git.lsRemoteRepository()
@@ -131,20 +134,26 @@ public class GitServiceImpl implements GitService {
                     .setRemote(url)
                     .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, token))
                     .call();
-            return true;
+            result.put("status", "success");
+            result.put("message", "Git 인증 성공");
         } catch (InvalidRemoteException e) {
-            System.out.println("Invalid remote URL: " + e.getMessage());
+            result.put("status", "error");
+            result.put("message", "유효하지 않은 Git URL입니다.");
         } catch (TransportException e) {
             if (e.getMessage().contains("Authentication is required") || e.getMessage().contains("not authorized")) {
-                System.out.println("Invalid username or token.");
+                result.put("status", "error");
+                result.put("message", "유효하지 않은 사용자 이름 또는 토큰입니다.");
             } else if(e.getMessage().contains("Not Found")){
-                System.out.println("Git URL does not exist in Github.");
+                result.put("status", "error");
+                result.put("message", "입력한 Git URL이 존재하지 않습니다.");
             }else {
-                System.out.println("Transport exception: " + e.getMessage());
+                result.put("status", "error");
+                result.put("message", "전송 오류 : " + e.getMessage());
             }
         } catch (GitAPIException e) {
-            throw new RuntimeException(e);
+            result.put("status", "error");
+            result.put("message", "Git 인증 오류 발생");
         }
-        return false;
+        return result;
     }
 }

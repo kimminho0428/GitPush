@@ -34,7 +34,7 @@ public class GitInfo extends BaseEntity {
     private String message;
 
     @Transient
-    private String rawToken; // 복호화된 토큰으로 DB에 저장되지 않음
+    private String rawToken;
 
     @Builder(toBuilder = true)
     public GitInfo(String localPath, String url, String username, String encryptedToken, String message) {

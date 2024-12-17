@@ -1,8 +1,8 @@
 package jgit.push.api.service.impl;
 
-import ch.qos.logback.core.util.StringUtil;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,6 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +23,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,8 +56,20 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<GitInfo> findPushList() {
-        return gitInfoRepository.findAll();
+    public List<PushList> findPushList() {
+        List<GitInfo> gitInfoList = gitInfoRepository.findAll();
+        return gitInfoList.stream()
+                .map(gitInfo -> PushList.builder()
+                        .id(gitInfo.getId())
+                        .localPath(gitInfo.getLocalPath())
+                        .url(gitInfo.getUrl())
+                        .username(gitInfo.getUsername())
+                        .encryptedToken(gitInfo.getEncryptedToken())
+                        .rawToken(gitInfo.getMessage())
+                        .message(gitInfo.getMessage())
+                        .createdDateTime(gitInfo.getCreatedDateTime())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -72,51 +83,29 @@ public class GitServiceImpl implements GitService {
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
-        // 새 저장소 초기화
         Git.init().setDirectory(new File(request.getLocalpath())).call();
-
-        // 저장소 열기 시도
         Git git = Git.open(new File(request.getLocalpath()));
-
-        // Git URI의 원격 저장소 연결
         git.remoteAdd().setName("origin").setUri(new URIish(request.getUrl())).call();
-
-        // 파일을 스테이지에 추가
         git.add().addFilepattern(".").call();
-
-        // 커밋
         git.commit().setMessage(request.getMessage()).call();
-
-        // 푸시
         PushCommand pushCommand = git.push();
         pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(request.getUsername(), request.getToken()));
         pushCommand.setForce(true);
         pushCommand.call();
 
-        // Git 객체 닫기
         git.close();
     }
 
     private void pushDir(GitPushRequest request) throws IOException, URISyntaxException, GitAPIException {
-        // 저장소 열기 시도
         Git git = Git.open(new File(request.getLocalpath()));
-
-        // Git URI의 원격 저장소 연결
         git.remoteAdd().setName("origin").setUri(new URIish(request.getUrl())).call();
-
-        // 파일을 스테이지에 추가
         git.add().addFilepattern(".").call();
-
-        // 커밋
         git.commit().setMessage(request.getMessage()).call();
-
-        // 푸시
         PushCommand pushCommand = git.push();
         pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(request.getUsername(), request.getToken()));
         pushCommand.setForce(true);
         pushCommand.call();
 
-        // Git 객체 닫기
         git.close();
     }
 
@@ -127,6 +116,11 @@ public class GitServiceImpl implements GitService {
         String token = request.getToken();
         Map<String, String> result = new HashMap<>();
 
+        handleError(url, username, token, result);
+        return result;
+    }
+
+    private void handleError(String url, String username, String token, Map<String, String> result) {
         try {
             Git.lsRemoteRepository()
                     .setHeads(true)
@@ -154,6 +148,5 @@ public class GitServiceImpl implements GitService {
             result.put("status", "error");
             result.put("message", "Git 인증 오류 발생");
         }
-        return result;
     }
 }

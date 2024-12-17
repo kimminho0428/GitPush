@@ -1,6 +1,7 @@
 package jgit.push.api.service;
 
 import jgit.push.api.controller.request.GitPushRequest;
+import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -17,7 +18,7 @@ public interface GitService {
 
     Map<String, String> checkGitRepository(GitPushRequest request);
 
-    List<GitInfo> findPushList();
+    List<PushList> findPushList();
 
     List<GitInfo> findPushListByName(String username);
 

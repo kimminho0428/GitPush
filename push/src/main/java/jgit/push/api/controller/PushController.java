@@ -3,6 +3,7 @@ package jgit.push.api.controller;
 import jakarta.servlet.http.HttpSession;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ public class PushController {
 
     @GetMapping("/pushlist")
     public String list(Model model) {
-        List<GitInfo> pushlist = gitService.findPushList();
+        List<PushList> pushlist = gitService.findPushList();
         model.addAttribute("pushlist", pushlist);
         return "push/pushList";
     }

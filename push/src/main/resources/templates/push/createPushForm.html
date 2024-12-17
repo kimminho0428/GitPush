@@ -6,7 +6,6 @@
         border-color: #bd2130;
     }
 
-    /* 모달창 스타일 */
     .modal {
         display: none;
         position: fixed;
@@ -53,7 +52,7 @@
             <input type="text" th:field="*{localpath}" class="form-control"
                    placeholder="localpath을 입력하세요"
                    th:class="${#fields.hasErrors('localpath')}? 'form-control
-fieldError' : 'form-control'">
+fieldError' : 'form-control'" disabled>
             <p th:if="${#fields.hasErrors('url')}"
                th:errors="*{localpath}">Incorrect localpath</p>
         </div>
@@ -62,24 +61,24 @@ fieldError' : 'form-control'">
             <input type="text" th:field="*{url}" class="form-control"
                    placeholder="url을 입력하세요"
                    th:class="${#fields.hasErrors('url')}? 'form-control
-fieldError' : 'form-control'">
+fieldError' : 'form-control'" disabled>
             <p th:if="${#fields.hasErrors('url')}"
                th:errors="*{url}">Incorrect url</p>
         </div>
         <div class="form-group mb-3">
             <label th:for="username">Name</label>
             <input type="text" th:field="*{username}" class="form-control"
-                   placeholder="username을 입력하세요">
+                   placeholder="username을 입력하세요" disabled>
         </div>
         <div class="form-group mb-3">
             <label th:for="token">Github Token</label>
             <input type="password" th:field="*{token}" class="form-control"
-                   placeholder="token을 입력하세요">
+                   placeholder="token을 입력하세요" disabled>
         </div>
         <div class="form-group mb-3">
             <label th:for="message">Commit message</label>
             <input type="text" th:field="*{message}" class="form-control"
-                   placeholder="commit message를 입력하세요">
+                   placeholder="commit message를 입력하세요" disabled>
         </div>
         <button type="submit" class="btn btn-primary" name="action" value="Push">Push</button>
         <button type="button" class="btn btn-primary" id="authBtn" value="Authentication">Authentication</button>
@@ -115,21 +114,17 @@ fieldError' : 'form-control'">
 </div> <!-- /container -->
 
 <script>
-    // 모달창 열기
     document.getElementById("authBtn").onclick = function () {
         document.getElementById("authModal").style.display = "block";
     }
 
-    // 모달창 닫기
     document.querySelector(".close").onclick = function () {
         document.getElementById("authModal").style.display = "none";
     }
 
-    // 인증 폼 제출
     document.getElementById("authForm").onsubmit = function (event) {
         event.preventDefault();
 
-        // 여기에 인증 요청을 처리하는 코드 추가 (예: Ajax 호출)
         let modalUrl = document.getElementById("modalUrl").value;
         let modalUsername = document.getElementById("modalUsername").value;
         let modalToken = document.getElementById("modalToken").value;
@@ -154,7 +149,6 @@ fieldError' : 'form-control'">
             return;
         }
 
-        // 예: 인증 처리 후 모달창 닫기
         fetch("/push/check-repository", {
             method: "POST",
             headers: {
@@ -169,10 +163,12 @@ fieldError' : 'form-control'">
             .then(response => response.json())
             .then(data => {
                 if (data.status === "success") {
-                    alert(data.message); // 인증 성공 메시지
+                    alert(data.message);
                     document.getElementById("authModal").style.display = "none";
+
+                    const inputFields = document.querySelectorAll("input[disabled]");
+                    inputFields.forEach(input => input.disabled = false);
                 } else {
-                    // 에러 메시지를 표시
                     errorMessage.textContent = data.message;
                     errorMessage.style.color = "red";
                 }

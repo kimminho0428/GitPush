@@ -24,4 +24,6 @@ public interface GitService {
 
     GitInfoDto findByNameAndUrl(String username, String url);
 
+    void deletePushList(Long id);
+
 }

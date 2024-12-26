@@ -73,6 +73,12 @@ public class GitServiceImpl implements GitService {
         return makeGitInfoDto(gitInfo);
     }
 
+    @Override
+    @Transactional
+    public void deletePushList(Long id) {
+        gitInfoRepository.deleteById(id);
+    }
+
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
         Git.init().setDirectory(new File(request.getLocalpath())).call();
         Git git = Git.open(new File(request.getLocalpath()));

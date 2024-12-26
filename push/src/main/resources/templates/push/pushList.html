@@ -22,12 +22,34 @@
                 <td th:text="${list.username}"></td>
                 <td th:text="${list.message}"></td>
                 <td th:text="${list.createdDateTime}"></td>
+                <td>
+                    <button class="btn btn-danger delete-btn" th:data-id="${list.id}">삭제</button>
+                </td>
             </tr>
             </tbody>
         </table>
     </div>
     <div th:replace="fragments/footer :: footer" />
 </div> <!-- /container -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function (){
+        $('.delete-btn').on('click', function (){
+            const id = $(this).data('id');
+            const row = $(this).closest('tr');
+            $.ajax({
+                url: `/pushlist/delete/${id}`,
+                type: 'DELETE',
+                success: function (){
+                    row.remove();
+                },
+                error: function (){
+                    alert('삭제 중 문제가 발생했습니다.');
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>
 ```

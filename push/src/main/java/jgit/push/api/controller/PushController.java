@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -117,4 +118,12 @@ public class PushController {
 
         return "redirect:/";
     }
+
+    @DeleteMapping("/pushlist/delete/{id}")
+    public ResponseEntity<Void> deletePushList(@PathVariable("id") Long id){
+        gitService.deletePushList(id);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

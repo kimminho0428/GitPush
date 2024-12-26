@@ -1,7 +1,5 @@
 package jgit.push.domain.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Transient;
 import lombok.Builder;
 import lombok.Getter;
 

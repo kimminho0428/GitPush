@@ -52,6 +52,7 @@ class GitServiceImplTest {
 
     }
 
+    @DisplayName("Git Push 정보 리스트를 화면에 출력하는지 테스트한다.")
     @Test
     void findPushList() {
         // given
@@ -75,6 +76,7 @@ class GitServiceImplTest {
         assertThat(pushList.get(0).getMessage()).isEqualTo(gitInfo.getMessage());
     }
 
+    @DisplayName("Git 유저명을 파라미터로 사용하여 DB에서 Push 정보를 조회하는지 테스트한다.")
     @Test
     void findPushListByName() {
         // given
@@ -98,6 +100,7 @@ class GitServiceImplTest {
         assertThat(pushList.get(0).getMessage()).isEqualTo(gitInfo.getMessage());
     }
 
+    @DisplayName("Git 유저명과 Url을 파라미터로 사용하여 DB에서 Push 정보를 조회하는지 테스트한다.")
     @Test
     void findByNameAndUrl() {
         // given
@@ -119,6 +122,28 @@ class GitServiceImplTest {
         assertThat(gitInfoDto.getUsername()).isEqualTo(gitInfo.getUsername());
         assertThat(gitInfoDto.getRawToken()).isEqualTo(gitInfo.getRawToken());
         assertThat(gitInfoDto.getMessage()).isEqualTo(gitInfo.getMessage());
+    }
+
+    @DisplayName("Id를 파라미터로 사용하여 Git Push 정보를 DB에서 삭제하는지 테스트한다.")
+    @Test
+    void deletePushList(){
+        // given
+        Long id = 1L;
+        String localpath = "C:/test";
+        String url = "https://github.com/test";
+        String username = "test";
+        String token = "abc";
+        String message = "Hello";
+
+
+        // when
+        GitInfo gitInfo = gitInfoRepository.save(
+                makeGitInfo(localpath, url, username, token, message)
+        );
+        gitInfoRepository.deleteById(id);
+
+        // then
+        assertThat(gitInfoRepository.findById(id)).isNotPresent();
     }
 
     private GitInfoDto makeGitInfoDto(GitInfo gitInfo) {

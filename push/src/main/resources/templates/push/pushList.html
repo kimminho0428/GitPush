@@ -1,6 +1,19 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/header :: header" />
+<style>
+    .delete-btn{
+        font-size: 14px;
+        padding: 5px 10px;
+        height: auto;
+        line-height: 1.2;
+        white-space: nowrap;
+        text-align: center;
+    }
+    td{
+        vertical-align: middle;
+    }
+</style>
 <body>
 <div class="container">
     <div th:replace="fragments/bodyHeader :: bodyHeader" />

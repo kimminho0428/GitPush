@@ -1,8 +1,10 @@
 package jgit.push.api.controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.dto.GitInfoDto;
 import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,7 @@ public class PushController {
     }
 
     @PostMapping("/push/new")
-    public String createPush(PushForm form, BindingResult result, @RequestParam("action") String action, Model model, HttpSession session) throws GitAPIException, IOException, URISyntaxException {
+    public String createPush(@Valid @ModelAttribute("PushForm") PushForm form, BindingResult result) throws GitAPIException, IOException, URISyntaxException {
 
         if (result.hasErrors()) {
             return "push/createPushForm";
@@ -52,7 +54,7 @@ public class PushController {
         gitService.pushGithub(request);
         gitService.saveGitPushInfo(request);
 
-        return "push/createPushForm";
+        return "redirect:/";
     }
 
     @PostMapping("/push/check-repository")
@@ -77,7 +79,7 @@ public class PushController {
     @PostMapping("/push/search")
     public String searchGitPushInfo(@ModelAttribute("SearchForm") SearchForm searchForm, Model model) {
         String username = searchForm.getUsername();
-        List<GitInfo> pushlist = gitService.findPushListByName(username);
+        List<PushList> pushlist = gitService.findPushListByName(username);
         model.addAttribute("pushlist", pushlist);
 
         return "push/pushlistAddUpdate";
@@ -88,7 +90,7 @@ public class PushController {
     public String editGitRepository(@RequestParam("username") String username,
                                     @RequestParam("url") String url,
                                     Model model) {
-        GitInfo gitInfo = gitService.findByNameAndUrl(username, url);
+        GitInfoDto gitInfo = gitService.findByNameAndUrl(username, url);
         UpdatePushForm updatePushForm = new UpdatePushForm(
                 gitInfo.getLocalPath(),
                 gitInfo.getUrl(),

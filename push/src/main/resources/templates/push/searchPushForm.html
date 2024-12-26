@@ -14,9 +14,7 @@
         <div class="form-group mb-3">
             <label th:for="username">Username</label>
             <input type="text" th:field="*{username}" class="form-control"
-                   placeholder="username 입력하세요"
-                   th:class="${#fields.hasErrors('username')}? 'form-control
-fieldError' : 'form-control'">
+                   placeholder="username 입력하세요">
             <p th:if="${#fields.hasErrors('username')}"
                th:errors="*{username}">Incorrect username</p>
         </div>

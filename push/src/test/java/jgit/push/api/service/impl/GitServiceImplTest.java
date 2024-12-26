@@ -1,63 +1,66 @@
 package jgit.push.api.service.impl;
 
+import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class GitServiceImplTest {
 
-    @Spy
-    private final GitService gitService;
-
-    @Spy
-    private final GitInfoRepository gitInfoRepository;
+    @Autowired
+    private GitService gitService;
 
     @Autowired
-    private GitServiceImpl gitServiceImpl;
+    private GitInfoRepository gitInfoRepository;
 
-    GitServiceImplTest(GitService gitService, GitInfoRepository gitInfoRepository) {
-        this.gitService = gitService;
-        this.gitInfoRepository = gitInfoRepository;
-    }
-
-
+    @DisplayName("Git Push 정보가 DB에 저장되는지 테스트한다.")
     @Test
     void saveGitPushInfo() {
         // given
-        String token = "abc";
         String localpath = "C:/test";
         String url = "https://github.com/kimminho0428/GitPush";
         String username = "kimminho0428";
+        String token = "abc";
         String message = "Test";
 
-        // when
-        GitInfo gitInfo = gitInfoRepository.save(new GitInfo(token, localpath, url, username, message));
+
+        //when
+        GitInfo savedGitInfo = gitInfoRepository.save(
+                GitInfo.builder()
+                        .localPath(localpath)
+                        .url(url)
+                        .username(username)
+                        .encryptedToken(token)
+                        .message(message)
+                        .build()
+        );
+
+        GitInfo gitInfo = gitInfoRepository.findById(savedGitInfo.getId()).orElseThrow();
 
         // then
-        assertThat(gitInfo)
-                .extracting("token", "loaclpath", "url", "username", "message")
-                .contains(
-                  tuple("abc", "C:/test", "https://github.com/kimminho0428/GitPush", "kimminho0428", "Test")
-                );
+        assertThat(gitInfo.getLocalPath()).isEqualTo(localpath);
+        assertThat(gitInfo.getUrl()).isEqualTo(url);
+        assertThat(gitInfo.getUsername()).isEqualTo(username);
+        assertThat(gitInfo.getRawToken()).isEqualTo(token);
+        assertThat(gitInfo.getMessage()).isEqualTo(message);
 
     }
 
     @Test
     void findPushList() {
+
+
+
     }
 
     @Test

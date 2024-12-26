@@ -2,6 +2,7 @@ package jgit.push.api.service.impl;
 
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.dto.GitInfoDto;
 import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
@@ -44,7 +45,6 @@ public class GitServiceImpl implements GitService {
     @Transactional
     @Override
     public void saveGitPushInfo(GitPushRequest request) {
-
         String token = request.getToken();
         gitInfoRepository.save(new GitInfo(
                 request.getLocalpath(),
@@ -58,28 +58,25 @@ public class GitServiceImpl implements GitService {
     @Override
     public List<PushList> findPushList() {
         List<GitInfo> gitInfoList = gitInfoRepository.findAll();
-        return gitInfoList.stream()
-                .map(gitInfo -> PushList.builder()
-                        .id(gitInfo.getId())
-                        .localPath(gitInfo.getLocalPath())
-                        .url(gitInfo.getUrl())
-                        .username(gitInfo.getUsername())
-                        .encryptedToken(gitInfo.getEncryptedToken())
-                        .rawToken(gitInfo.getMessage())
-                        .message(gitInfo.getMessage())
-                        .createdDateTime(gitInfo.getCreatedDateTime())
-                        .build())
-                .collect(Collectors.toList());
+        return savePushlist(gitInfoList);
     }
 
     @Override
-    public List<GitInfo> findPushListByName(String username) {
-        return gitInfoRepository.findAllByUsername(username);
+    public List<PushList> findPushListByName(String username) {
+        List<GitInfo> gitInfoList = gitInfoRepository.findAllByUsername(username);
+        return savePushlist(gitInfoList);
     }
 
     @Override
-    public GitInfo findByNameAndUrl(String username, String url) {
-        return gitInfoRepository.findByUsernameAndUrl(username, url);
+    public GitInfoDto findByNameAndUrl(String username, String url) {
+        GitInfo gitInfo = gitInfoRepository.findByUsernameAndUrl(username, url);
+        return GitInfoDto.builder()
+                .localPath(gitInfo.getLocalPath())
+                .url(gitInfo.getUrl())
+                .username(gitInfo.getUsername())
+                .rawToken(gitInfo.getRawToken())
+                .message(gitInfo.getMessage())
+                .build();
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
@@ -120,6 +117,21 @@ public class GitServiceImpl implements GitService {
         return result;
     }
 
+    private List<PushList> savePushlist(List<GitInfo> gitInfoList) {
+        return gitInfoList.stream()
+                .map(gitInfo -> PushList.builder()
+                        .id(gitInfo.getId())
+                        .localPath(gitInfo.getLocalPath())
+                        .url(gitInfo.getUrl())
+                        .username(gitInfo.getUsername())
+                        .encryptedToken(gitInfo.getEncryptedToken())
+                        .rawToken(gitInfo.getRawToken())
+                        .message(gitInfo.getMessage())
+                        .createdDateTime(gitInfo.getCreatedDateTime())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private void handleError(String url, String username, String token, Map<String, String> result) {
         try {
             Git.lsRemoteRepository()
@@ -137,10 +149,13 @@ public class GitServiceImpl implements GitService {
             if (e.getMessage().contains("Authentication is required") || e.getMessage().contains("not authorized")) {
                 result.put("status", "error");
                 result.put("message", "유효하지 않은 사용자 이름 또는 토큰입니다.");
-            } else if(e.getMessage().contains("Not Found")){
+            } else if (e.getMessage().contains("Not Found")) {
                 result.put("status", "error");
                 result.put("message", "입력한 Git URL이 존재하지 않습니다.");
-            }else {
+            } else if (e.getMessage().contains("Invalid username or token")) {
+                result.put("status", "error");
+                result.put("message", "유효하지 않은 사용자 이름 또는 토큰입니다.");
+            } else {
                 result.put("status", "error");
                 result.put("message", "전송 오류 : " + e.getMessage());
             }

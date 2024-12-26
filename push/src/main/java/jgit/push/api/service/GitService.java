@@ -1,8 +1,8 @@
 package jgit.push.api.service;
 
 import jgit.push.api.controller.request.GitPushRequest;
+import jgit.push.domain.dto.GitInfoDto;
 import jgit.push.domain.dto.PushList;
-import jgit.push.domain.entity.GitInfo;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.IOException;
@@ -20,8 +20,8 @@ public interface GitService {
 
     List<PushList> findPushList();
 
-    List<GitInfo> findPushListByName(String username);
+    List<PushList> findPushListByName(String username);
 
-    GitInfo findByNameAndUrl(String username, String url);
+    GitInfoDto findByNameAndUrl(String username, String url);
 
 }

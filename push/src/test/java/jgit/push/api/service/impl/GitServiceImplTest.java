@@ -1,15 +1,18 @@
 package jgit.push.api.service.impl;
 
-import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
+import jgit.push.domain.dto.GitInfoDto;
+import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,23 +31,16 @@ class GitServiceImplTest {
     void saveGitPushInfo() {
         // given
         String localpath = "C:/test";
-        String url = "https://github.com/kimminho0428/GitPush";
-        String username = "kimminho0428";
+        String url = "https://github.com/test";
+        String username = "test";
         String token = "abc";
-        String message = "Test";
+        String message = "Hello";
 
 
-        //when
+        // when
         GitInfo savedGitInfo = gitInfoRepository.save(
-                GitInfo.builder()
-                        .localPath(localpath)
-                        .url(url)
-                        .username(username)
-                        .encryptedToken(token)
-                        .message(message)
-                        .build()
+                makeGitInfo(localpath, url, username, token, message)
         );
-
         GitInfo gitInfo = gitInfoRepository.findById(savedGitInfo.getId()).orElseThrow();
 
         // then
@@ -58,16 +54,105 @@ class GitServiceImplTest {
 
     @Test
     void findPushList() {
+        // given
+        String localpath = "C:/test";
+        String url = "https://github.com/test";
+        String username = "test";
+        String encryptedToken = "abc";
+        String message = "Hello";
+        GitInfo gitInfo = makeGitInfo(localpath, url, username, encryptedToken, message);
+        gitInfoRepository.save(gitInfo);
 
+        // when
+        List<GitInfo> gitInfoList = gitInfoRepository.findAll();
+        List<PushList> pushList = savePushList(gitInfoList);
 
-
+        // then
+        assertThat(pushList.get(0).getLocalPath()).isEqualTo(gitInfo.getLocalPath());
+        assertThat(pushList.get(0).getUrl()).isEqualTo(gitInfo.getUrl());
+        assertThat(pushList.get(0).getUsername()).isEqualTo(gitInfo.getUsername());
+        assertThat(pushList.get(0).getEncryptedToken()).isEqualTo(gitInfo.getEncryptedToken());
+        assertThat(pushList.get(0).getMessage()).isEqualTo(gitInfo.getMessage());
     }
 
     @Test
     void findPushListByName() {
+        // given
+        String localpath = "C:/test";
+        String url = "https://github.com/test";
+        String username = "test";
+        String encryptedToken = "abc";
+        String message = "Hello";
+        GitInfo gitInfo = makeGitInfo(localpath, url, username, encryptedToken, message);
+        gitInfoRepository.save(gitInfo);
+
+        // when
+        List<GitInfo> gitInfoList = gitInfoRepository.findAllByUsername(username);
+        List<PushList> pushList = savePushList(gitInfoList);
+
+        // then
+        assertThat(pushList.get(0).getLocalPath()).isEqualTo(gitInfo.getLocalPath());
+        assertThat(pushList.get(0).getUrl()).isEqualTo(gitInfo.getUrl());
+        assertThat(pushList.get(0).getUsername()).isEqualTo(gitInfo.getUsername());
+        assertThat(pushList.get(0).getEncryptedToken()).isEqualTo(gitInfo.getEncryptedToken());
+        assertThat(pushList.get(0).getMessage()).isEqualTo(gitInfo.getMessage());
     }
 
     @Test
     void findByNameAndUrl() {
+        // given
+        String localpath = "C:/test";
+        String url = "https://github.com/test";
+        String username = "test";
+        String encryptedToken = "abc";
+        String message = "Hello";
+        GitInfo gitInfo = makeGitInfo(localpath, url, username, encryptedToken, message);
+        gitInfoRepository.save(gitInfo);
+
+        // when
+        gitInfoRepository.findByUsernameAndUrl(username, url);
+        GitInfoDto gitInfoDto = makeGitInfoDto(gitInfo);
+
+        // then
+        assertThat(gitInfoDto.getLocalPath()).isEqualTo(gitInfo.getLocalPath());
+        assertThat(gitInfoDto.getUrl()).isEqualTo(gitInfo.getUrl());
+        assertThat(gitInfoDto.getUsername()).isEqualTo(gitInfo.getUsername());
+        assertThat(gitInfoDto.getRawToken()).isEqualTo(gitInfo.getRawToken());
+        assertThat(gitInfoDto.getMessage()).isEqualTo(gitInfo.getMessage());
+    }
+
+    private GitInfoDto makeGitInfoDto(GitInfo gitInfo) {
+        return GitInfoDto.builder()
+                .localPath(gitInfo.getLocalPath())
+                .url(gitInfo.getUrl())
+                .username(gitInfo.getUsername())
+                .rawToken(gitInfo.getRawToken())
+                .message(gitInfo.getMessage())
+                .build();
+    }
+
+    private GitInfo makeGitInfo(String localpath, String url, String username, String encryptedToken, String message) {
+        return GitInfo.builder()
+                .localPath(localpath)
+                .url(url)
+                .username(username)
+                .encryptedToken(encryptedToken)
+                .message(message)
+                .build();
+    }
+
+    private List<PushList> savePushList(List<GitInfo> gitInfoList) {
+        return gitInfoList.stream()
+                .map(gitInfo -> PushList.builder()
+                        .id(gitInfo.getId())
+                        .localPath(gitInfo.getLocalPath())
+                        .url(gitInfo.getUrl())
+                        .username(gitInfo.getUsername())
+                        .encryptedToken(gitInfo.getEncryptedToken())
+                        .rawToken(gitInfo.getRawToken())
+                        .createdDateTime(gitInfo.getCreatedDateTime())
+                        .message(gitInfo.getMessage())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

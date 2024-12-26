@@ -70,13 +70,7 @@ public class GitServiceImpl implements GitService {
     @Override
     public GitInfoDto findByNameAndUrl(String username, String url) {
         GitInfo gitInfo = gitInfoRepository.findByUsernameAndUrl(username, url);
-        return GitInfoDto.builder()
-                .localPath(gitInfo.getLocalPath())
-                .url(gitInfo.getUrl())
-                .username(gitInfo.getUsername())
-                .rawToken(gitInfo.getRawToken())
-                .message(gitInfo.getMessage())
-                .build();
+        return makeGitInfoDto(gitInfo);
     }
 
     private void initRepoWithPush(GitPushRequest request) throws GitAPIException, IOException, URISyntaxException {
@@ -130,6 +124,16 @@ public class GitServiceImpl implements GitService {
                         .createdDateTime(gitInfo.getCreatedDateTime())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    private GitInfoDto makeGitInfoDto(GitInfo gitInfo) {
+        return GitInfoDto.builder()
+                .localPath(gitInfo.getLocalPath())
+                .url(gitInfo.getUrl())
+                .username(gitInfo.getUsername())
+                .rawToken(gitInfo.getRawToken())
+                .message(gitInfo.getMessage())
+                .build();
     }
 
     private void handleError(String url, String username, String token, Map<String, String> result) {

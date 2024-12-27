@@ -1,6 +1,8 @@
 package jgit.push.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.dto.GitInfoDto;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +15,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PushController.class)
@@ -95,6 +102,40 @@ class PushControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("Ajax를 사용하여 Git Repository가 존재하는지 테스트한다.")
+    @WithMockUser(username = "testUser")
+    @Test
+    void checkGitRepository() throws Exception {
+        // given
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        GitPushRequest request = new GitPushRequest("localpath", "url", "user", "token", "message");
+
+        // when
+        when(gitService.checkGitRepository(any(GitPushRequest.class))).thenReturn(response);
+
+        // then
+        mockMvc.perform(
+                        post("/push/check-repository")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .with(csrf())
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"));
+    }
+    @WithMockUser(username = "testUser")
+    @Test
+    void deletePushList() throws Exception {
+        // given
+        Long id = 1L;
+
+        // when // then
+        mockMvc.perform(
+                delete("/pushlist/delete/1")
+                        .with(csrf()))
                 .andExpect(status().isOk());
     }
 

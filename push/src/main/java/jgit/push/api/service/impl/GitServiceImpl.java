@@ -1,5 +1,6 @@
 package jgit.push.api.service.impl;
 
+import jgit.push.api.controller.request.GitCheckRequest;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.dto.GitInfoDto;
@@ -7,6 +8,8 @@ import jgit.push.domain.dto.PushList;
 import jgit.push.domain.entity.GitInfo;
 import jgit.push.domain.repository.GitInfoRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.client.fluent.Response;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -15,6 +18,8 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,7 +112,7 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<String, String> checkGitRepository(GitPushRequest request) {
+    public Map<String, String> checkGitRepository(GitCheckRequest request) {
         String url = request.getUrl();
         String username = request.getUsername();
         String token = request.getToken();
@@ -144,34 +149,39 @@ public class GitServiceImpl implements GitService {
 
     private void handleError(String url, String username, String token, Map<String, String> result) {
         try {
-            Git.lsRemoteRepository()
-                    .setHeads(true)
-                    .setTags(true)
-                    .setRemote(url)
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, token))
-                    .call();
-            result.put("status", "success");
-            result.put("message", "Git 인증 성공");
-        } catch (InvalidRemoteException e) {
-            result.put("status", "error");
-            result.put("message", "유효하지 않은 Git URL입니다.");
-        } catch (TransportException e) {
-            if (e.getMessage().contains("Authentication is required") || e.getMessage().contains("not authorized")) {
+            boolean isPrivate = isPrivateRepository(url, username, token);
+            if (isPrivate) {
+                result.put("status", "success");
+                result.put("message", "Git 인증 성공: Private Repository");
+            } else {
+                result.put("status", "success");
+                result.put("message", "Git 인증 성공: Public Repository");
+            }
+        } catch (Exception e) {
+            if (e.getMessage().contains("Unauthorized")) {
                 result.put("status", "error");
-                result.put("message", "유효하지 않은 사용자 이름 또는 토큰입니다.");
-            } else if (e.getMessage().contains("Not Found")) {
+                result.put("message", "유효하지 않은 유저명 또는 Token입니다.");
+            } else if(e.getMessage().contains("Not Found")){
                 result.put("status", "error");
-                result.put("message", "입력한 Git URL이 존재하지 않습니다.");
-            } else if (e.getMessage().contains("Invalid username or token")) {
-                result.put("status", "error");
-                result.put("message", "유효하지 않은 사용자 이름 또는 토큰입니다.");
+                result.put("message", "유저명 또는 URL을 찾을 수 없습니다.");
             } else {
                 result.put("status", "error");
-                result.put("message", "전송 오류 : " + e.getMessage());
+                result.put("message", "Git 인증 실패: " + e.getMessage());
             }
-        } catch (GitAPIException e) {
-            result.put("status", "error");
-            result.put("message", "Git 인증 오류 발생");
         }
+    }
+
+    private boolean isPrivateRepository(String url, String username, String token) throws Exception{
+        String apiUrl = "https://api.github.com/repos/" + username + "/" + getRepositoryName(url);
+        Response response = Request.Get(apiUrl)
+                .addHeader("Authorization", "token " + token)
+                .execute();
+        String responseBody = response.returnContent().asString();
+        JSONObject jsonObject = new JSONObject(responseBody);
+        return jsonObject.getBoolean("private");
+    }
+
+    private String getRepositoryName(String url) {
+        return url.substring(url.lastIndexOf("/") + 1);
     }
 }

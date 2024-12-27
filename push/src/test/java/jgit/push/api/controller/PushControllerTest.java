@@ -2,6 +2,7 @@ package jgit.push.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jgit.push.api.controller.request.GitCheckRequest;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.dto.GitInfoDto;
@@ -112,10 +113,10 @@ class PushControllerTest {
         // given
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
-        GitPushRequest request = new GitPushRequest("localpath", "url", "user", "token", "message");
+        GitCheckRequest request = new GitCheckRequest("url", "user", "token");
 
         // when
-        when(gitService.checkGitRepository(any(GitPushRequest.class))).thenReturn(response);
+        when(gitService.checkGitRepository(any(GitCheckRequest.class))).thenReturn(response);
 
         // then
         mockMvc.perform(

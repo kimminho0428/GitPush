@@ -1,6 +1,7 @@
 package jgit.push.api.controller;
 
 import jakarta.validation.Valid;
+import jgit.push.api.controller.request.GitCheckRequest;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.api.service.GitService;
 import jgit.push.domain.dto.GitInfoDto;
@@ -55,7 +56,7 @@ public class PushController {
 
     @PostMapping("/push/check-repository")
     @ResponseBody
-    public Map<String, String> checkGitRepositoryAjax(@RequestBody GitPushRequest request){
+    public Map<String, String> checkGitRepositoryAjax(@RequestBody GitCheckRequest request){
         return gitService.checkGitRepository(request);
     }
 

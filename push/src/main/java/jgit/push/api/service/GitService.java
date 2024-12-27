@@ -1,5 +1,6 @@
 package jgit.push.api.service;
 
+import jgit.push.api.controller.request.GitCheckRequest;
 import jgit.push.api.controller.request.GitPushRequest;
 import jgit.push.domain.dto.GitInfoDto;
 import jgit.push.domain.dto.PushList;
@@ -16,7 +17,7 @@ public interface GitService {
 
     void saveGitPushInfo(GitPushRequest request);
 
-    Map<String, String> checkGitRepository(GitPushRequest request);
+    Map<String, String> checkGitRepository(GitCheckRequest request);
 
     List<PushList> findPushList();
 

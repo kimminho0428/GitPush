@@ -152,7 +152,13 @@
                 token: modalToken
             })
         })
-            .then(response => response.json())
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("HTTP error " + response.status);
+                }
+                return response.json();
+            })
+
             .then(data => {
                 if (data.status === "success") {
                     alert(data.message);
@@ -167,7 +173,6 @@
             })
             .catch(error => {
                 console.error("Error:", error);
-
             });
     }
 </script>

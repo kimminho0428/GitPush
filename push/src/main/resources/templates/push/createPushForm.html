@@ -41,6 +41,10 @@
         text-decoration: none;
         cursor: pointer;
     }
+
+    input[readonly]{
+        background-color: #f0f0f0;
+    }
 </style>
 <body>
 <div class="container">
@@ -49,28 +53,28 @@
           method="post">
         <div class="form-group mb-3">
             <label th:for="localpath">Local Path</label>
-            <input type="text" th:field="*{localpath}" class="form-control"
-                   placeholder="localpath을 입력하세요" disabled>
+            <input type="text" th:field="*{localpath}" name="localpath" class="form-control"
+                   placeholder="localpath을 입력하세요" readonly>
         </div>
         <div class="form-group mb-3">
             <label th:for="url">Url</label>
-            <input type="text" th:field="*{url}" class="form-control"
-                   placeholder="url을 입력하세요" disabled>
+            <input type="text" th:field="*{url}" name="url" class="form-control"
+                   placeholder="url을 입력하세요" readonly>
         </div>
         <div class="form-group mb-3">
             <label th:for="username">User Name</label>
-            <input type="text" th:field="*{username}" class="form-control"
-                   placeholder="username을 입력하세요" disabled>
+            <input type="text" th:field="*{username}" name="username" class="form-control"
+                   placeholder="username을 입력하세요" readonly>
         </div>
         <div class="form-group mb-3">
             <label th:for="token">Github Token</label>
-            <input type="password" th:field="*{token}" class="form-control"
-                   placeholder="token을 입력하세요" disabled>
+            <input type="password" th:field="*{token}" name="token" class="form-control"
+                   placeholder="token을 입력하세요" readonly>
         </div>
         <div class="form-group mb-3">
             <label th:for="message">Commit message</label>
-            <input type="text" th:field="*{message}" class="form-control"
-                   placeholder="commit message를 입력하세요" disabled>
+            <input type="text" th:field="*{message}" name="message" class="form-control"
+                   placeholder="commit message를 입력하세요" readonly>
         </div>
         <button type="submit" class="btn btn-primary" name="action" value="Push">Push</button>
         <button type="button" class="btn btn-primary" id="authBtn" value="Authentication">Authentication</button>
@@ -163,9 +167,21 @@
                 if (data.status === "success") {
                     alert(data.message);
                     document.getElementById("authModal").style.display = "none";
+                    errorMessage.textContent = "";
 
-                    const inputFields = document.querySelectorAll("input[disabled]");
-                    inputFields.forEach(input => input.disabled = false);
+                    document.querySelector("input[name='url']").value = modalUrl;
+                    document.querySelector("input[name='username']").value = modalUsername;
+                    document.querySelector("input[name='token']").value = modalToken;
+
+                    document.querySelector("input[name='localpath']").readOnly = false;
+                    document.querySelector("input[name='localpath']").style.backgroundColor = "";
+                    document.querySelector("input[name='message']").readOnly = false;
+                    document.querySelector("input[name='message']").style.backgroundColor = "";
+
+                    document.getElementById("modalUrl").value = "";
+                    document.getElementById("modalUsername").value = "";
+                    document.getElementById("modalToken").value = "";
+
                 } else {
                     errorMessage.textContent = data.message;
                     errorMessage.style.color = "red";
